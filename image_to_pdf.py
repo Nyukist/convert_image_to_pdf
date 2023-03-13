@@ -8,8 +8,9 @@ from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
 
 
-def images_picker(source_type) -> tuple:
+def images_picker(source_type: str) -> tuple:
     Tk().withdraw()
+
     file_types = [
         ('document', '*.svg')
     ] if source_type == 'svg' else [
@@ -23,6 +24,7 @@ def images_picker(source_type) -> tuple:
 
 def save_as_pdf(source_type: Optional[str]) -> None:
     picked_images: tuple = images_picker(source_type)
+
     if picked_images:
         file_path = '/'.join(picked_images[0].split('/')[:-1])
         file_name = ''.join(picked_images[0].split('/')[-1:]).split('.')[0]
@@ -33,9 +35,13 @@ def save_as_pdf(source_type: Optional[str]) -> None:
                 renderPDF.drawToFile(draw, f'{file_path}/{file_name} ({n}).pdf')
         else:
             image_list = [Image.open(image).convert('RGB') for image in picked_images]
-            image_list[0].save(f'{file_path}/{file_name}.pdf', save_all=True, append_images=image_list[1:])
+            image_list[0].save(
+                f'{file_path}/{file_name}.pdf',
+                save_all=True,
+                append_images=image_list[1:]
+            )
 
-        print('generated to pdf')
+        print('generated!')
 
 
 def usage_message(n):
