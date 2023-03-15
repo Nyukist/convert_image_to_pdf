@@ -4,6 +4,7 @@ from tkinter.filedialog import askopenfilenames
 from typing import Optional
 
 from PIL import Image
+from PyPDF2 import PdfWriter
 from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
 
@@ -22,6 +23,14 @@ def images_picker(source_type: str) -> tuple:
     return images
 
 
+def merge_pdf(paths: list, file_name: str) -> None:
+    merger = PdfWriter()
+    for path in paths:
+        merger.append(path)
+    merger.write(file_name)
+    merger.close()
+
+
 def save_as_pdf(source_type: Optional[str]) -> None:
     picked_images: tuple = images_picker(source_type)
 
@@ -30,9 +39,15 @@ def save_as_pdf(source_type: Optional[str]) -> None:
         file_name = ''.join(picked_images[0].split('/')[-1:]).split('.')[0]
 
         if 'svg' == source_type:
+            path_list = []
             for n, image in enumerate(picked_images, start=1):
+                each_fullname = f'{file_path}/{file_name} ({n}).pdf'
                 draw = svg2rlg(image)
-                renderPDF.drawToFile(draw, f'{file_path}/{file_name} ({n}).pdf')
+                renderPDF.drawToFile(draw, each_fullname)
+                path_list.append(each_fullname)
+
+            if len(path_list) > 1:
+                merge_pdf(path_list, f'{file_path}/{file_name}.pdf')
         else:
             image_list = [Image.open(image).convert('RGB') for image in picked_images]
             image_list[0].save(
